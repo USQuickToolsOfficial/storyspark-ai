@@ -1,0 +1,311 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StorySpark AI - Video Creator</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090817;color:#f7f2ff;font-family:Arial,sans-serif}
+header{padding:18px 5%;border-bottom:1px solid #302544;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:23px;font-weight:bold}.logo span{color:#ae80ff}
+.tag{font-size:10px;color:#a9efc9;border:1px solid #367657;padding:8px;border-radius:20px}
+main{max-width:1050px;margin:auto;padding:25px 15px}
+.hero{text-align:center;padding:30px 0}
+.hero h1{font-size:clamp(32px,7vw,55px);margin:10px}
+.hero h1 span{color:#aa83ff}
+.hero p{color:#aaa1bd;line-height:1.6}
+.panel{background:#171329;border:1px solid #382a50;border-radius:15px;padding:20px;margin:16px 0}
+h2{font-size:21px;margin-top:5px}
+label{display:block;font-size:11px;color:#b9a8d7;margin:15px 0 7px}
+input,textarea,select{width:100%;padding:12px;background:#0c0a19;color:white;border:1px solid #443653;border-radius:8px;font-size:14px}
+textarea{min-height:100px;resize:vertical}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+button{padding:12px;border:0;border-radius:8px;cursor:pointer;font-weight:bold}
+.primary{background:linear-gradient(100deg,#a34cf1,#596df5);color:white;width:100%;margin-top:18px}
+.secondary{background:#302344;color:#e8d9ff;margin:5px 4px 5px 0}
+button:disabled{opacity:.5}
+.notice{background:#201a32;border:1px solid #49345f;padding:12px;border-radius:8px;color:#d1baf4;font-size:12px;line-height:1.6}
+.scene{background:#100e20;border:1px solid #342746;border-radius:10px;padding:14px;margin:12px 0}
+.scene h3{font-size:14px;color:#c6a3ff}
+.scene p{font-size:13px;color:#d1c8df;line-height:1.6}
+.prompt{font-size:11px;color:#ad91d5;background:#1b1529;padding:10px;border-radius:7px;line-height:1.5}
+.scene img{max-width:100%;max-height:180px;display:block;margin-top:10px;border-radius:8px}
+#status{color:#a9efc9;font-size:12px;margin-top:12px}
+#preview{width:100%;background:#000;border-radius:10px;display:none}
+footer{text-align:center;color:#807590;padding:25px;font-size:11px}
+@media(max-width:550px){.grid{grid-template-columns:1fr}.panel{padding:15px}.tag{font-size:9px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="logo">✦ StorySpark <span>AI</span></div>
+ <div class="tag">● FREE STUDIO</div>
+</header>
+<main>
+<section class="hero">
+ <div style="color:#c09aff;font-size:11px;letter-spacing:3px">YOUR CREATIVE VIDEO STUDIO</div>
+ <h1>Your Story. <span>Your Video.</span></h1>
+ <p>Turn your ideas into scripts, storyboards and videos.</p>
+</section>
+
+<div class="notice">
+<strong>Free mode:</strong> Script and storyboard generation work in your browser. You can add your own pictures and create a video preview. This version does not use a paid AI video API.
+</div>
+
+<section class="panel">
+<h2>✦ Create your story</h2>
+<label>VIDEO TITLE</label>
+<input id="title" value="The Secret of the Lost Island">
+
+<label>WHAT IS YOUR STORY ABOUT?</label>
+<textarea id="topic">A group of sailors are stranded on a mysterious island for fifteen years. Tell their story of survival, courage and hope.</textarea>
+
+<div class="grid">
+<div>
+<label>VIDEO CATEGORY</label>
+<select id="category">
+<option>History / Survival Documentary</option>
+<option>Horror & Mystery</option>
+<option>Educational</option>
+<option>Islamic Stories</option>
+<option>Motivational</option>
+<option>Science & Technology</option>
+<option>YouTube Storytelling</option>
+<option>2D Animation</option>
+<option>3D Animation</option>
+<option>Cinematic Realistic</option>
+</select>
+</div>
+<div>
+<label>DURATION</label>
+<select id="duration">
+<option value="1">1 minute</option>
+<option value="5" selected>5 minutes</option>
+<option value="10">10 minutes</option>
+<option value="12">12 minutes</option>
+<option value="15">15 minutes</option>
+</select>
+</div>
+<div>
+<label>LANGUAGE</label>
+<select id="language">
+<option>English</option>
+<option>Urdu</option>
+<option>Hindi</option>
+</select>
+</div>
+<div>
+<label>VOICE STYLE</label>
+<select id="voice">
+<option>Female</option>
+<option>Male</option>
+</select>
+</div>
+<div>
+<label>VIDEO RATIO</label>
+<select id="ratio">
+<option value="16:9">16:9 YouTube</option>
+<option value="9:16">9:16 Shorts / Reels</option>
+<option value="1:1">1:1 Square</option>
+</select>
+</div>
+<div>
+<label>VISUAL STYLE</label>
+<select id="visual">
+<option>Cinematic realistic</option>
+<option>2D animation</option>
+<option>3D animation</option>
+<option>Dark mystery</option>
+<option>Documentary</option>
+</select>
+</div>
+</div>
+<button class="primary" onclick="generate()">✦ GENERATE SCRIPT & STORYBOARD</button>
+<div id="status"></div>
+</section>
+
+<section class="panel" id="results" style="display:none">
+<h2>✍ Your Script</h2>
+<div id="script" style="white-space:pre-wrap;line-height:1.7;font-size:13px;color:#ddd"></div>
+<button class="secondary" onclick="downloadScript()">Download Script</button>
+<button class="secondary" onclick="downloadSRT()">Download Subtitles</button>
+<button class="secondary" onclick="downloadProject()">Save Project</button>
+<hr style="border-color:#382a50;margin:20px 0">
+<h2>🎬 Scene Storyboard</h2>
+<div id="scenes"></div>
+</section>
+
+<section class="panel" id="videoPanel" style="display:none">
+<h2>▶ Create Your Video</h2>
+<p style="font-size:12px;color:#aaa">Upload pictures for your scenes. The browser will animate them into a video. Longer videos may take time and require your screen to remain open.</p>
+<label>OPTIONAL BACKGROUND MUSIC</label>
+<input type="file" id="music" accept="audio/*">
+<button class="primary" id="renderBtn" onclick="renderVideo()">▶ CREATE VIDEO</button>
+<div id="renderStatus"></div>
+<video id="preview" controls playsinline></video>
+<a id="downloadVideo" style="display:none;color:#c59aff" download="StorySpark-Video.webm">Download Your Video</a>
+</section>
+</main>
+<footer>STORYSPARK AI · Your Story. Your Voice. Your Video.</footer>
+
+<script>
+let project=null;
+let images={};
+
+const templates=[
+["The Beginning","Introduce the story, its people and the place where everything begins."],
+["The Mystery","Reveal the mystery and the questions that make this story unforgettable."],
+["The Challenge","Show the biggest challenges, dangers and difficult decisions."],
+["The Turning Point","A surprising event changes the direction of the story."],
+["The Human Story","Explore courage, fear, hope and the strength of the people involved."],
+["The Ending","Explain the outcome and the lasting lesson of this remarkable story."],
+["The Legacy","Finish with a powerful reflection for the audience."]
+];
+
+function generate(){
+ const title=document.getElementById('title').value.trim()||'My Story';
+ const topic=document.getElementById('topic').value.trim();
+ if(!topic){alert('Please enter your story idea.');return;}
+ const minutes=Number(document.getElementById('duration').value);
+ const count=minutes<=1?4:minutes<=5?5:7;
+ const language=document.getElementById('language').value;
+ const visual=document.getElementById('visual').value;
+ const category=document.getElementById('category').value;
+ const voice=document.getElementById('voice').value;
+ const ratio=document.getElementById('ratio').value;
+ const scenes=templates.slice(0,count).map((t,i)=>({
+  number:i+1,
+  title:t[0],
+  narration:`${t[1]} The story is about ${topic}. Develop this moment with details, emotion and a clear connection to the next scene.`,
+  prompt:`${visual}, ${category}, ${t[0]}, ${topic}, cinematic lighting, detailed environment, professional composition, no text.`,
+  seconds:Math.max(5,Math.floor(minutes*60/count))
+ }));
+ project={title,topic,minutes,language,category,voice,ratio,scenes};
+ images={};
+ let script=`${title}\n\n${topic}\n\n`;
+ scenes.forEach(s=>script+=`SCENE ${s.number}: ${s.title}\n${s.narration}\n\n`);
+ script+=`Thank you for watching ${title}. Subscribe for more amazing stories.`;
+ project.script=script;
+ document.getElementById('script').textContent=script;
+ document.getElementById('scenes').innerHTML='';
+ scenes.forEach(s=>{
+  const div=document.createElement('div');
+  div.className='scene';
+  div.innerHTML=`<h3>SCENE ${s.number}: ${s.title}</h3>
+  <p>${s.narration}</p>
+  <div class="prompt"><b>VISUAL PROMPT</b><br>${s.prompt}</div>
+  <label>UPLOAD SCENE IMAGE</label>
+  <input type="file" accept="image/*" id="image${s.number}">
+  <div id="imagePreview${s.number}"></div>`;
+  document.getElementById('scenes').appendChild(div);
+  document.getElementById('image'+s.number).addEventListener('change',e=>{
+   const f=e.target.files[0];if(!f)return;
+   const url=URL.createObjectURL(f);images[s.number]=url;
+   document.getElementById('imagePreview'+s.number).innerHTML=`<img src="${url}" alt="Scene image">`;
+  });
+ });
+ document.getElementById('results').style.display='block';
+ document.getElementById('videoPanel').style.display='block';
+ document.getElementById('status').textContent='Your script and storyboard are ready!';
+ document.getElementById('results').scrollIntoView({behavior:'smooth'});
+}
+
+function downloadFile(name,data,type){
+ const a=document.createElement('a');
+ const url=URL.createObjectURL(new Blob([data],{type}));
+ a.href=url;a.download=name;a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function downloadScript(){downloadFile('StorySpark-Script.txt',project.script,'text/plain');}
+function downloadProject(){downloadFile('StorySpark-Project.json',JSON.stringify(project,null,2),'application/json');}
+function timecode(s){return new Date(s*1000).toISOString().substr(11,8)+',000';}
+function downloadSRT(){
+ let t=0,out='';
+ project.scenes.forEach(s=>{
+  out+=`${s.number}\n${timecode(t)} --> ${timecode(t+s.seconds)}\n${s.narration}\n\n`;
+  t+=s.seconds;
+ });
+ downloadFile('StorySpark-Subtitles.srt',out,'text/plain');
+}
+
+function renderVideo(){
+ if(!project)return;
+ const selected=project.scenes.filter(s=>images[s.number]);
+ if(!selected.length){alert('Please upload at least one scene image first.');return;}
+ if(!window.MediaRecorder){alert('Video recording is not supported in this browser.');return;}
+ const btn=document.getElementById('renderBtn');
+ btn.disabled=true;
+ const status=document.getElementById('renderStatus');
+ status.textContent='Preparing video... Please keep this page open.';
+ const canvas=document.createElement('canvas');
+ let w=1280,h=720;
+ if(project.ratio==='9:16'){w=720;h=1280;}
+ if(project.ratio==='1:1'){w=900;h=900;}
+ canvas.width=w;canvas.height=h;
+ const ctx=canvas.getContext('2d');
+ const stream=canvas.captureStream(25);
+ let mime='video/webm;codecs=vp9';
+ if(!MediaRecorder.isTypeSupported(mime))mime='video/webm';
+ const recorder=new MediaRecorder(stream,{mimeType:mime});
+ const chunks=[];
+ recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};
+ recorder.onstop=()=>{
+  const blob=new Blob(chunks,{type:'video/webm'});
+  const url=URL.createObjectURL(blob);
+  const video=document.getElementById('preview');
+  video.src=url;video.style.display='block';
+  const a=document.getElementById('downloadVideo');
+  a.href=url;a.style.display='inline-block';
+  btn.disabled=false;status.textContent='Your video is ready! Download it below.';
+  video.scrollIntoView({behavior:'smooth'});
+ };
+ const loaded=[];
+ let index=0,frame=0,sceneFrames=150;
+ selected.forEach(s=>{
+  const img=new Image();img.src=images[s.number];loaded.push({scene:s,img});
+ });
+ Promise.all(loaded.map(x=>new Promise((resolve,reject)=>{
+  x.img.onload=resolve;x.img.onerror=reject;
+ }))).then(()=>{
+  recorder.start();
+  function draw(){
+   const item=loaded[index];
+   if(!item){recorder.stop();return;}
+   ctx.fillStyle='#080715';ctx.fillRect(0,0,w,h);
+   const scale=Math.max(w/item.img.width,h/item.img.height);
+   const sw=item.img.width*scale,sh=item.img.height*scale;
+   const zoom=1+Math.min(frame/sceneFrames,1)*.07;
+   const dw=sw*zoom,dh=sh*zoom;
+   ctx.drawImage(item.img,(w-dw)/2,(h-dh)/2,dw,dh);
+   ctx.fillStyle='rgba(0,0,0,.52)';
+   ctx.fillRect(0,h*.72,w,h*.28);
+   ctx.fillStyle='white';
+   ctx.font=`bold ${Math.max(22,w*.035)}px Arial`;
+   ctx.textAlign='center';
+   ctx.fillText(item.scene.title,w/2,h*.79);
+   ctx.font=`${Math.max(15,w*.021)}px Arial`;
+   const words=item.scene.narration.split(' ');
+   let line='',lines=[],max=w*.85;
+   words.forEach(word=>{
+    let test=line+word+' ';
+    if(ctx.measureText(test).width>max){lines.push(line);line=word+' ';}
+    else line=test;
+   });
+   lines.push(line);
+   lines.slice(0,3).forEach((l,i)=>ctx.fillText(l,w/2,h*.84+i*Math.max(22,w*.028)));
+   frame++;
+   if(frame>=sceneFrames){frame=0;index++;}
+   if(index>=loaded.length){recorder.stop();return;}
+   status.textContent=`Rendering scene ${index+1} of ${loaded.length}...`;
+   setTimeout(draw,40);
+  }
+  draw();
+ }).catch(e=>{
+  btn.disabled=false;status.textContent='Could not load an image. Please try another image.';
+ });
+}
+</script>
+</body>
+</html>
